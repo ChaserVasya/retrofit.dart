@@ -31,3 +31,4 @@ node_modules
 yarn.lock
 *.reflectable.dart
 *.g.dart
+.fvm
