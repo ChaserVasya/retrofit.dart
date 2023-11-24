@@ -10,10 +10,10 @@ import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:dio/dio.dart';
+import 'package:protobuf/protobuf.dart';
 import 'package:retrofit/retrofit.dart' as retrofit;
 import 'package:source_gen/source_gen.dart';
 import 'package:tuple/tuple.dart';
-import 'package:protobuf/protobuf.dart';
 
 const _analyzerIgnores =
     '// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers';
@@ -1390,13 +1390,11 @@ if (T != dynamic &&
       } else {
         switch (clientAnnotation.parser) {
           case retrofit.Parser.JsonSerializable:
-            if (_isDateTime(p.type)) {
+            if (_hasToJson(p.type)) {
               value = p.type.nullabilitySuffix == NullabilitySuffix.question
-                  ? refer(p.displayName)
-                      .nullSafeProperty('toIso8601String')
-                      .call([])
-                  : refer(p.displayName).property('toIso8601String').call([]);
-            } else if (_isEnum(p.type) && !_hasToJson(p.type)) {
+                  ? refer(p.displayName).nullSafeProperty('toJson').call([])
+                  : refer(p.displayName).property('toJson').call([]);
+            } else if (_isEnum(p.type)) {
               value = p.type.nullabilitySuffix == NullabilitySuffix.question
                   ? refer(p.displayName).nullSafeProperty('name')
                   : refer(p.displayName).property('name');
