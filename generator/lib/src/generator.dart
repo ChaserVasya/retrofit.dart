@@ -122,7 +122,18 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       } else {
         c.extend = Reference(_generateTypeParameterizedName(element));
       }
-      c.methods.add(_generateOptionsCastMethod());
+      final bool needOptionsCast =
+          element.methods.any((m) => m.parameters.any((p) {
+                final ann =
+                    _typeChecker(retrofit.DioOptions).firstAnnotationOf(p);
+                if (ann == null) return false;
+                final typeStr = _displayString(p.type);
+                return typeStr.contains('Options');
+              }));
+
+      if (needOptionsCast) {
+        c.methods.add(_generateOptionsCastMethod());
+      }
       c.methods.addAll([
         _generateTypeSetterMethod(),
         _generateCombineBaseUrlsMethod(),
