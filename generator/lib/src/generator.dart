@@ -64,7 +64,6 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
   static const _onReceiveProgress = 'onReceiveProgress';
   static const _path = 'path';
   static const _valueVar = '_value';
-  bool hasCustomOptions = false;
 
   /// Global options specified in the `build.yaml`
 
@@ -123,9 +122,7 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       } else {
         c.extend = Reference(_generateTypeParameterizedName(element));
       }
-      if (hasCustomOptions) {
-        c.methods.add(_generateOptionsCastMethod());
-      }
+      c.methods.add(_generateOptionsCastMethod());
       c.methods.addAll([
         _generateTypeSetterMethod(),
         _generateCombineBaseUrlsMethod(),
@@ -629,8 +626,8 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
     String returnAsyncWrapper =
         m.returnType.isDartAsyncFuture ? 'return' : 'yield';
     if (callAdapter != null) {
-      final callAdapterOriginalReturnType = callAdapter.superclass
-        ?.typeArguments.firstOrNull as InterfaceType?;
+      final callAdapterOriginalReturnType =
+          callAdapter.superclass?.typeArguments.firstOrNull as InterfaceType?;
       returnAsyncWrapper = _isReturnTypeFuture(
               callAdapterOriginalReturnType?.getDisplayString() ?? '')
           ? 'return'
@@ -1478,7 +1475,7 @@ You should create a new class to encapsulate the response.
         type,
       ]);
     } else {
-      hasCustomOptions = true;
+      // needOptionsCast handled in _implementClass now
       blocks.add(
         declareFinal('newOptions')
             .assign(
@@ -2074,10 +2071,9 @@ ${bodyName.displayName} == null
           ], {
             'filename': fileName,
             if (contentType != null)
-              'contentType':
-                  refer('DioMediaType', 'package:dio/dio.dart')
-                      .property('parse')
-                      .call([literal(contentType)]),
+              'contentType': refer('DioMediaType', 'package:dio/dio.dart')
+                  .property('parse')
+                  .call([literal(contentType)]),
           });
 
           final optionalFile = m.parameters
@@ -2316,10 +2312,9 @@ ${bodyName.displayName} == null
                   "jsonEncode(${p.displayName}${p.type.nullabilitySuffix == NullabilitySuffix.question ? ' ?? <String,dynamic>{}' : ''})",
                 ),
               ], {
-                'contentType':
-                    refer('DioMediaType', 'package:dio/dio.dart')
-                        .property('parse')
-                        .call([literal(contentType)]),
+                'contentType': refer('DioMediaType', 'package:dio/dio.dart')
+                    .property('parse')
+                    .call([literal(contentType)]),
               });
 
               final optionalFile = m.parameters
