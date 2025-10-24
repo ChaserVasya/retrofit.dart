@@ -106,7 +106,6 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
   /// Generates the implementation class code as a string.
   String _implementClass(ClassElement2 element, ConstantReader annotation) {
     // Reset hasCustomOptions for each class to avoid state leaking between classes
-    hasCustomOptions = false;
     final className = globalOptions.className ?? '_${element.name3}';
     final enumString = annotation.peek('parser')?.revive().accessor;
     final parser = retrofit.Parser.values.firstWhereOrNull(
@@ -144,14 +143,14 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       } else {
         c.extend = Reference(_generateTypeParameterizedName(element));
       }
-      final bool needOptionsCast =
-          element.methods.any((m) => m.parameters.any((p) {
-                final ann =
-                    _typeChecker(retrofit.DioOptions).firstAnnotationOf(p);
-                if (ann == null) return false;
-                final typeStr = _displayString(p.type);
-                return typeStr.contains('Options');
-              }));
+      final bool needOptionsCast = element.methods.any(
+        (m) => m.typeParameters.any((p) {
+          final ann = _typeChecker(retrofit.DioOptions).firstAnnotationOf(p);
+          if (ann == null) return false;
+          final typeStr = _displayString(p.bound);
+          return typeStr.contains('Options');
+        }),
+      );
 
       if (needOptionsCast) {
         c.methods.add(_generateOptionsCastMethod());
@@ -1884,7 +1883,9 @@ if (T != dynamic &&
   /// Gets the expression for serializing an enum value in FormData as a string.
   /// Uses toJson() if available, otherwise uses .name.
   String _getEnumValueExpression(DartType enumType, String variableName) {
-    return _hasToJson(enumType) ? '$variableName.toJson()' : '$variableName.name';
+    return _hasToJson(enumType)
+        ? '$variableName.toJson()'
+        : '$variableName.name';
   }
 
   /// Gets the Reference for serializing an enum value in FormData.
@@ -1918,9 +1919,7 @@ if (T != dynamic &&
           case retrofit.Parser.JsonSerializable:
             if (_hasToJson(p.type)) {
               value = p.type.nullabilitySuffix == NullabilitySuffix.question
-                  ? refer(
-                      p.displayName,
-                    ).nullSafeProperty('toJson').call([])
+                  ? refer(p.displayName).nullSafeProperty('toJson').call([])
                   : refer(p.displayName).property('toJson').call([]);
             } else if (_isEnum(p.type)) {
               value = p.type.nullabilitySuffix == NullabilitySuffix.question

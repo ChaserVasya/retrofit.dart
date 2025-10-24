@@ -20,7 +20,8 @@ dependencies:
   dart_style: ^3.1.1
   dio: ^5.8.0
   protobuf: ^5.0.0
-  retrofit: ^4.7.3
+  retrofit:
+    path: ../retrofit
   source_gen: '>=3.1.0 <5.0.0'
 
 dev_dependencies:
