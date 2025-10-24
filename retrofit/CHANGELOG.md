@@ -1,4 +1,30 @@
-# Changelog
+## 4.7.2
+- Add comments for each public methods
+- Enable linter rules for public api docs
+
+## 4.7.1
+- update to new tag format with prefix letter v
+
+## 4.7.0
+
+- Updates minimum supported SDK version to Dart 3.8.
+
+## 4.5.0
+
+- Added `@BodyExtra` annotation to support adding individual fields to request body, enhancing flexibility and extensibility.
+
+  Example :
+
+  ```dart
+  @http.POST('/path/')
+  Future<String> updateValue(@BodyExtra('id') int id, @BodyExtra('value') String value);
+  ```
+
+  The request body will be：
+  
+  ```json
+  {"id": 123, "value": "some value"}
+  ```
 
 ## 4.4.2
 

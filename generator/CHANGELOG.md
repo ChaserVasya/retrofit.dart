@@ -1,3 +1,100 @@
+## 10.0.8 (Unreleased)
+
+- Add experimental lean_builder support infrastructure
+- Add `lib/lean_builder.dart` entry point for lean_builder users
+- Add comprehensive documentation for lean_builder support
+- Note: lean_builder is now an **optional** dependency - it's not required unless you want to use lean_builder
+- Note: Full lean_builder implementation is pending until lean_builder reaches stability
+
+## 10.0.6
+
+- Update `protobuf` to 5.0.0
+
+## 10.0.5
+
+- Allow build 4.0.0.
+
+## 10.0.3
+
+- Require source_gen: 3.1.0, stop using deprecated `TypeChecker.fromRuntime` and use the new `TypeChecker.typeNamed` instead.
+
+## 10.0.2
+
+- Format generated code with default DartFormatter
+- Add `dart format off` and `dart format on` comments to generated code
+
+## 10.0.1
+
+- Fix dependencies versions
+
+## 10.0.0
+
+- Migrate to `Element2`
+- Updates minimum supported SDK version to Dart 3.8
+
+## 9.7.0
+
+- Upgrade build_runner to 2.5.4
+
+## 9.6.0
+
+ - Updates minimum supported SDK version to Dart 3.6
+
+## 9.5.0
+
+- Migrate enum value name resolve from `.name` to `.toString()`
+  `.name` is pretty limited to in terms of adjusting the value. Having resolve through `.toString()`
+  gives you high level of flexibility on changing the resulting request value. Another improvement
+  that this fix synchronizes the way of resolving values for individual enum values and for the list
+  of entities. Previously individual values where resolved through `.name` and list of enums via `.toString`
+  deeper inside `dio` client
+
+## 9.3.0
+
+- Added `@BodyExtra` annotation: Add individual fields to request body without defining complete DTO classes
+  - Support for adding dynamic fields to existing request bodies
+  - `expand` parameter (default: false) to control object field flattening behavior
+
+  Example(Combine fields):
+
+  ```dart
+  @http.POST('/path/')
+  Future<String> updateValue(@BodyExtra('id') int id, @BodyExtra('value') String value);
+  ```
+
+  Request body result:
+  
+  ```json
+  {"id": 123, "value": "some value"}
+  ```
+
+  Example(Combine objects):
+
+  ```dart
+  // pseudocode
+  class User {
+    int userId;
+    String userName;
+  }
+
+  class Settings {
+    int a;
+    int b;
+  }
+
+  @http.POST('/path/')
+  Future<String> updateValue(
+    @BodyExtra('user', expand: true) User user, 
+    @BodyExtra('settings', expand: true) Settings settings,
+  );
+  ```
+
+  Request body result:
+  
+  ```json
+  {"userId": 123, "userName": "hhh", "a": 1, "b": 2}
+  ```
+
 ## 9.2.0
 
 - Update protobuf version to 4.0.0
@@ -63,7 +160,7 @@
         return Either.right(response);
       }
       catch (e) {
-        return Either.left(ApiError(e))
+        return Either.left(ApiError(e));
       }
     }
   }
