@@ -1,9 +1,11 @@
+
 # Retrofit For Dart
 
 [![retrofit](https://img.shields.io/pub/v/retrofit?label=retrofit&style=flat-square)](https://pub.dartlang.org/packages/retrofit)
 [![retrofit_generator](https://img.shields.io/pub/v/retrofit_generator?label=retrofit_generator&style=flat-square)](https://pub.dartlang.org/packages/retrofit_generator)
 ![Pub Likes](https://img.shields.io/pub/likes/retrofit)
 [![Testing](https://github.com/trevorwang/retrofit.dart/actions/workflows/test.yml/badge.svg)](https://github.com/trevorwang/retrofit.dart/actions/workflows/test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/trevorwang/retrofit.dart/badge.svg?branch=master)](https://coveralls.io/github/trevorwang/retrofit.dart?branch=master)
 
 retrofit.dart is a type conversion [dio](https://github.com/flutterchina/dio/) client generator using [source_gen](https://github.com/dart-lang/source_gen) and inspired by [Chopper](https://github.com/lejard-h/chopper) and [Retrofit](https://github.com/square/retrofit).
 
@@ -15,14 +17,14 @@ Add the generator to your dev dependencies
 
 ```yaml
 dependencies:
-  retrofit: ^4.4.0
-  logger: ^2.4.0  # for logging purpose
+  retrofit: ^4.6.0
+  logger: ^2.6.0  # for logging purpose
   json_annotation: ^4.9.0
 
 dev_dependencies:
-  retrofit_generator: '>=8.0.0 <10.0.0' # for Dart 3.3 use ^9.0.0
-  build_runner: ^2.3.3
-  json_serializable: ^6.8.0
+  retrofit_generator: ^10.0.1
+  build_runner: ^2.6.0
+  json_serializable: ^6.10.0
 ```
 
 ### Define and Generate your API
@@ -62,7 +64,25 @@ then run the generator
 ```sh
 # dart
 dart pub run build_runner build
+
+# for watch mode (recommended during development)
+dart pub run build_runner watch
 ```
+
+#### Lean Builder Support (Experimental)
+
+Retrofit now has experimental support for [lean_builder](https://pub.dev/packages/lean_builder), a faster build system for Dart. While lean_builder support is still under development, the infrastructure has been added for future use.
+
+**Important**: lean_builder is an **optional** dependency and is NOT required to use retrofit_generator. It's only needed if you want to try the experimental lean_builder support.
+
+To prepare for lean_builder support, add it to your `dev_dependencies`:
+
+```yaml
+dev_dependencies:
+  lean_builder: ^0.1.2  # Optional - only if you want to use lean_builder
+```
+
+**Note:** For now, please continue using `build_runner` as shown above. Full lean_builder integration will be available in a future release once lean_builder reaches stability.
 
 ### Use it
 
@@ -102,6 +122,21 @@ class Task {
 
   final String name;
 }
+```
+
+> For enums, we rely on the `toString()` method to convert it to a string. Override the `toString()` method to return the value you want.
+
+```dart
+enum Status {
+  pending,
+  completed;
+
+  @override
+  String toString() => name;
+}
+
+@GET('/tasks/{status}')
+Future<List<Task>> getTasksByStatus(@Path() Status status);
 ```
 
 #### Typed extras
@@ -159,6 +194,7 @@ The HTTP methods in the below sample are supported.
   Future<Task> createTask(@Body() Task task);
   
   @POST('http://httpbin.org/post')
+  @MultiPart()
   Future<void> createNewTaskFromFile(@Part() File file);
   
   @POST('http://httpbin.org/post')
@@ -198,6 +234,39 @@ The HTTP methods in the below sample are supported.
   })
   Future<Task> getTasks();
 ```
+
+* Add global HTTP headers to all requests in the API
+
+You can define headers at the `@RestApi` level that will be automatically included in all requests:
+
+```dart
+  @RestApi(
+    baseUrl: 'https://api.example.com',
+    headers: {
+      'User-Agent': 'MyApp/1.0.0',
+      'X-Platform': 'mobile',
+    },
+  )
+  abstract class ApiService {
+    factory ApiService(Dio dio, {String? baseUrl}) = _ApiService;
+
+    // This request will automatically include User-Agent and X-Platform headers
+    @GET('/users')
+    Future<List<User>> getUsers();
+
+    // You can add method-specific headers that combine with global headers
+    @GET('/profile')
+    @Headers(<String, dynamic>{'Authorization': 'Bearer token'})
+    Future<User> getProfile();
+
+    // Method-level headers override global headers with the same key
+    @GET('/settings')
+    @Headers(<String, dynamic>{'X-Platform': 'web'})
+    Future<Settings> getSettings();
+  }
+```
+
+**Note:** Method-level headers (via `@Headers` or `@Header` parameter) will override global headers if they have the same key.
 
 
 
