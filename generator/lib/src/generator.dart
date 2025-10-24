@@ -163,16 +163,7 @@ class RetrofitGenerator extends GeneratorForAnnotation<retrofit.RestApi> {
       } else {
         c.extend = Reference(_generateTypeParameterizedName(element));
       }
-      final bool needOptionsCast =
-          element.methods.any((m) => m.parameters.any((p) {
-                final ann =
-                    _typeChecker(retrofit.DioOptions).firstAnnotationOf(p);
-                if (ann == null) return false;
-                final typeStr = _displayString(p.type);
-                return typeStr.contains('Options');
-              }));
-
-      if (needOptionsCast) {
+      if (hasCustomOptions) {
         c.methods.add(_generateOptionsCastMethod());
       }
       c.methods.addAll([
@@ -1908,7 +1899,9 @@ if (T != dynamic &&
   /// Gets the expression for serializing an enum value in FormData as a string.
   /// Uses toJson() if available, otherwise uses .name.
   String _getEnumValueExpression(DartType enumType, String variableName) {
-    return _hasToJson(enumType) ? '$variableName.toJson()' : '$variableName.name';
+    return _hasToJson(enumType)
+        ? '$variableName.toJson()'
+        : '$variableName.name';
   }
 
   /// Gets the Reference for serializing an enum value in FormData.
